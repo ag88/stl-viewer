@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="jar">
+
+    <property name="tgtjarfile" value="stlviewer.jar" />
+    
+	<path id="classpath">
+	    	<pathelement path="libs/j3dcore.jar"/>
+   	        <pathelement path="libs/j3dutils.jar"/>
+   	        <pathelement path="libs/vecmath.jar"/>   	        
+   	        <pathelement path="libs/jogamp-fat.jar"/>   	        
+	        <!-- pathelement path="libs/log4j-api-2.8.jar"/-->
+	        <!-- pathelement path="libs/log4j-core-2.8.jar"/-->	        
+	</path>
+	        	    
+    <target name="clean">
+        <delete dir="bin"/>
+    </target>
+
+    <target name="compile">
+        <mkdir dir="bin"/>
+        <javac srcdir="src" destdir="bin">
+            <classpath refid="classpath" />            
+		</javac>
+    </target>
+
+    <target name="jar" depends="compile">
+        <manifestclasspath property="jar.classpath" jarfile="${tgtjarfile}">
+			<classpath refid="classpath" />
+		</manifestclasspath>
+        
+        <jar destfile="${tgtjarfile}" basedir="bin">
+            <manifest>
+                <attribute name="Main-Class" value="org.stlviewer.STLViewer"/>
+				<attribute name="Class-Path" value="${jar.classpath}" />                
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="run" depends="jar">
+        <java jar="${tgtjarfile}" fork="true"/>
+    </target>
+
+</project>
+
