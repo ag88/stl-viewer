@@ -53,3 +53,6 @@ cpedrinaci/STL-Loader https://github.com/cpedrinaci/STL-Loader
 applies to code package org.stlviewer sub-branch
 
 Software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+
+# origin
+originally hosted on: https://github.com/ag88/stl-viewer
