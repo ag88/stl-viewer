@@ -1,19 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project default="jar">
+<project default="zip">
 
     <property name="tgtjarfile" value="stlviewer.jar" />
-    
+    <property name="tgtzipfile" value="stlviewer.zip" />
+     
+      
 	<path id="classpath">
 	    	<pathelement path="libs/j3dcore.jar"/>
    	        <pathelement path="libs/j3dutils.jar"/>
    	        <pathelement path="libs/vecmath.jar"/>   	        
    	        <pathelement path="libs/jogamp-fat.jar"/>   	        
-	        <!-- pathelement path="libs/log4j-api-2.8.jar"/-->
-	        <!-- pathelement path="libs/log4j-core-2.8.jar"/-->	        
 	</path>
 	        	    
     <target name="clean">
         <delete dir="bin"/>
+        <delete file="${tgtjarfile}"/>
+        <delete file="dist/${tgtzipfile}"/>
     </target>
 
     <target name="compile">
@@ -29,6 +31,7 @@
 		</manifestclasspath>
         
         <jar destfile="${tgtjarfile}" basedir="bin">
+            <zipfileset dir="src/images" prefix="images"/>
             <manifest>
                 <attribute name="Main-Class" value="org.stlviewer.STLViewer"/>
 				<attribute name="Class-Path" value="${jar.classpath}" />                
@@ -36,6 +39,20 @@
         </jar>
     </target>
 
+    <target name="zip" depends="jar">
+        <mkdir dir="dist"/>
+        <zip destfile="dist/${tgtzipfile}">
+             <zipfileset dir="libs" prefix="stlviewer/libs"/>
+             <zipfileset dir="." prefix="stlviewer">
+                 <include name="${tgtjarfile}"/>
+                 <include name="README.md"/>
+                 <include name="license.txt"/>
+                 <include name="attributions.txt"/>                     
+             </zipfileset>
+        </zip>
+        
+    </target>
+    
     <target name="run" depends="jar">
         <java jar="${tgtjarfile}" fork="true"/>
     </target>
