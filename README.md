@@ -1,7 +1,7 @@
 STLViewer
 =========
 
-[STL](http://en.wikipedia.org/wiki/STL_(file_format\)) 3D object file viewer for java.
+[STL](http://en.wikipedia.org/wiki/STL_(file_format)) 3D object file viewer for java.
 
 # install
 unzip distributed stlviewer*.zip
