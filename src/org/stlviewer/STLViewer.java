@@ -13,9 +13,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -23,6 +26,8 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JToolBar;
+
+import org.stlviewer.PModel;
 
 import com.sun.j3d.utils.universe.SimpleUniverse;
 import com.sun.j3d.utils.universe.ViewingPlatform;
@@ -36,6 +41,8 @@ public class STLViewer extends JFrame implements ActionListener, WindowListener 
 	JLabel lstatusline;
 	PModel model;
 	SimpleUniverse universe;
+	
+	JCheckBoxMenuItem mnstrp;
 	
 	public STLViewer(String args[]) throws HeadlessException {
 		super("STL Viewer");
@@ -64,6 +71,13 @@ public class STLViewer extends JFrame implements ActionListener, WindowListener 
 		mres.addActionListener(this);
 		mview.add(mres);
 		mbar.add(mview);
+		JMenu mtools = new JMenu("Tools");
+		mfile.setMnemonic(KeyEvent.VK_T);
+		mnstrp = new JCheckBoxMenuItem("Regen Normals/Connect strips",true);
+		mnstrp.addActionListener(this);
+		mtools.add(mnstrp);
+		mbar.add(mtools);
+
 		
 		setJMenuBar(mbar);
 
@@ -135,21 +149,29 @@ public class STLViewer extends JFrame implements ActionListener, WindowListener 
 		
 		// read file to array of triangles
 		try {
-			List<Triangle> mesh = STLParser.parseSTLFile(file.toPath());
+			
+			List<Triangle> mesh = STLParser.parseSTLFile(file.toPath());			
+			
 			if (mesh == null || mesh.isEmpty()) {
 				lstatusline.setText("no data read, possible file error");
 				return;
-			}
+			} else
+				lstatusline.setText(" ");
 			
 			if(model != null)
-				model.cleanup();
+				model.cleanup();			
 			model = new PModel();
+			model.setBnormstrip(mnstrp.isSelected());
 			model.addtriangles(mesh);
+			//model.loadstl(file);
 			
 			canvas.rendermodel(model, universe);
 			
 		} catch (IOException e) {
 			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			lstatusline.setText("no data read, possible file error");
+			Logger.getLogger(STLViewer.class.getName()).log(Level.WARNING, e.getMessage());
 		}
 	}
 
@@ -159,8 +181,7 @@ public class STLViewer extends JFrame implements ActionListener, WindowListener 
 			loadfile();			
 		} else if(e.getActionCommand().equals("VHOME")) {
 			canvas.homeview(universe);
-		}
-
+		} 
 	}
 
 	public static void main(String[] args) {

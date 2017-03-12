@@ -85,7 +85,7 @@ public class STLParser {
 	 * @throws IllegalArgumentException Thrown if the STL is not properly 
 	 * formatted
 	 */
-	public static List<Triangle> readASCII(String content) {
+	public static List<Triangle> readASCII(String content) throws IllegalArgumentException {
 		Logger.getLogger(STLParser.class.getName()).log(Level.FINEST,"Parsing ASCII STL format");
 		// string is lowercase
 		ArrayList<Triangle> triangles = new ArrayList<>();
@@ -149,7 +149,7 @@ public class STLParser {
 	 * @throws IllegalArgumentException Thrown if the STL is not properly 
 	 * formatted
 	 */
-	public static List<Triangle> readBinary(byte[] allBytes) {
+	public static List<Triangle> readBinary(byte[] allBytes) throws IllegalArgumentException {
 		Logger.getLogger(STLParser.class.getName()).log(Level.FINEST,"Parsing binary STL format");
 		DataInputStream in = new DataInputStream(new ByteArrayInputStream(allBytes));
 		ArrayList<Triangle> triangles = new ArrayList<>();

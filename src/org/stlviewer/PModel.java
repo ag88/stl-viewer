@@ -1,7 +1,12 @@
 package org.stlviewer;
 
 import java.awt.Color;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.media.j3d.Appearance;
 import javax.media.j3d.BranchGroup;
@@ -15,12 +20,19 @@ import javax.vecmath.Color4f;
 import javax.vecmath.Point3f;
 import javax.vecmath.Vector3f;
 
+
 import com.sun.j3d.utils.geometry.GeometryInfo;
+import com.sun.j3d.utils.geometry.NormalGenerator;
+import com.sun.j3d.utils.geometry.Stripifier;
 
 import hall.collin.christopher.stl4j.Triangle;
 import hall.collin.christopher.stl4j.Vec3d;
 
 public class PModel extends BranchGroup {
+	
+	private static Logger logger = Logger.getLogger(PModel.class.getName());
+	
+	private boolean bnormstrip = true;
 
 	public PModel() {		
 		init();
@@ -29,8 +41,16 @@ public class PModel extends BranchGroup {
 	public PModel(String name) {
 		setName(name);
 		setCapability(BranchGroup.ALLOW_DETACH);
-	}
+	}		
 	
+	public boolean isBnormstrip() {
+		return bnormstrip;
+	}
+
+	public void setBnormstrip(boolean bnormstrip) {
+		this.bnormstrip = bnormstrip;
+	}
+
 	private void init() {
 		setName("MODEL");
 		setCapability(BranchGroup.ALLOW_DETACH);
@@ -63,9 +83,20 @@ public class PModel extends BranchGroup {
 		gi.setCoordinates(coordarray);
 		gi.setNormals(normarray);
 		// gi.setStripCounts(stripCounts);
-
-		//Stripifier st = new Stripifier();
-		//st.stripify(gi);
+		
+		if (bnormstrip)
+			try {
+				// generate normals
+				NormalGenerator ng = new NormalGenerator();
+				ng.generateNormals(gi);
+				// stripify
+				Stripifier st = new Stripifier();
+				st.stripify(gi);
+			} catch (Exception e) {
+				String msg = new String("unable to generate normals or stripify:");
+				msg = msg.concat(e.getMessage());
+				Logger.getLogger(PModel.class.getName()).log(Level.WARNING, msg);
+			};
 
 		// yellow appearance
 		Appearance appearance = new Appearance();
@@ -92,6 +123,7 @@ public class PModel extends BranchGroup {
 		//scene.addNamedObject(objectName, shape);
 
 	} 
+
 	
 	public void cleanup() {
 		detach();
