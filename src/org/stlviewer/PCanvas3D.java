@@ -1,5 +1,6 @@
 package org.stlviewer;
 
+import java.awt.Font;
 import java.awt.GraphicsConfiguration;
 import java.util.ArrayList;
 
@@ -11,16 +12,22 @@ import javax.media.j3d.Bounds;
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Canvas3D;
 import javax.media.j3d.DirectionalLight;
+import javax.media.j3d.Font3D;
+import javax.media.j3d.FontExtrusion;
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.LineArray;
 import javax.media.j3d.Locale;
 import javax.media.j3d.Shape3D;
+import javax.media.j3d.Text3D;
 import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
 import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
+import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
+
+import org.stlviewer.PModel;
 
 import com.sun.j3d.utils.behaviors.vp.OrbitBehavior;
 import com.sun.j3d.utils.universe.SimpleUniverse;
@@ -91,8 +98,25 @@ public class PCanvas3D extends Canvas3D {
 		
 		Shape3D origin = new Shape3D();
 		origin.setGeometry(linearray);
-		origin.setName("ORIGIN");		
+		origin.setName("ORIGIN");
 		objRoot.addChild(origin);
+		
+		/*
+	    origin = new Shape3D();	    
+	    Font3D font3D = new Font3D(new Font("Helvetica", Font.PLAIN, 1),
+	    		new FontExtrusion());
+	    Text3D tx = new Text3D(font3D, "X");
+	    tx.setPosition(new Point3f(1.0f, 0.0f, 0.0f));
+	    origin.addGeometry(tx);
+	    Text3D ty = new Text3D(font3D, "Y");
+	    ty.setPosition(new Point3f(0.0f, 1.0f, 0.0f));
+	    origin.addGeometry(ty);
+	    Text3D tz = new Text3D(font3D, "Z");
+	    tz.setPosition(new Point3f(0.0f, 0.0f, 1.0f));
+	    origin.addGeometry(tz);
+	    origin.setName("ORIGINTX");
+	    objRoot.addChild(origin);	    
+	    */
 
 		locale.addBranchGraph(objRoot);
 		
@@ -126,18 +150,44 @@ public class PCanvas3D extends Canvas3D {
 				double h = Math.abs(up.z - low.z);
 				double max = Math.max(l, w);
 				max = Math.max(max, h);
-				double scale = 10.0/max; 
+				double scale = 10.0/max;
+				double la = Math.sqrt(low.x * low.x + low.y * low.y);
+				double lb = Math.sqrt(la*la + low.z*low.z);
+				double ra = Math.sqrt(center.x * center.x + center.y * center.y);
+				double rb = Math.sqrt(ra*ra + center.z*center.z);
+				double dr = lb - rb;
+				double tx = 0.0, ty = 0.0, tz = 0.0;
+				if (dr > 0) {
+					tx = low.x;
+					ty = low.y;
+					tz = low.z;
+				}
+				Vector3d vt = new Vector3d(-tx, -ty, -tz);
+				
 				Transform3D t3d = new Transform3D();
 				objTrans.getTransform(t3d);
+				t3d.setTranslation(vt);
 				t3d.setScale(scale);
 				objTrans.setTransform(t3d);				
 			} else if (bounds instanceof BoundingSphere) {
 				BoundingSphere b = (BoundingSphere) bounds;
 				double r = b.getRadius();								
 				double scale = 10.0/r;
+				double c = Math.sqrt(center.x*center.x + center.y*center.y);
+				double d = Math.sqrt(c*c + center.z*center.z);
+				double dr = Math.abs(d) - r;
+				double tx = 0.0, ty = 0.0, tz = 0.0;
+				if (dr > 0) {
+					tx = dr * center.x * scale / d;
+					ty = dr * center.y * scale / d;
+					tz = dr * center.z * scale / d;
+				}
+				Vector3d vt = new Vector3d(-tx, -ty, -tz);
+				
 				Transform3D t3d = new Transform3D();
 				objTrans.getTransform(t3d);
-				t3d.setScale(scale);
+				t3d.setTranslation(vt);
+				t3d.setScale(scale);				
 				objTrans.setTransform(t3d);
 				
 			};
@@ -147,7 +197,8 @@ public class PCanvas3D extends Canvas3D {
 			// add mouse behaviors to the ViewingPlatform
 			ViewingPlatform viewingPlatform = universe.getViewingPlatform();
 			OrbitBehavior orbit = new OrbitBehavior(this, OrbitBehavior.REVERSE_ALL);
-			BoundingSphere bounds2 = new BoundingSphere(center, 100.0);
+			//BoundingSphere bounds2 = new BoundingSphere(center, 100.0);
+			BoundingSphere bounds2 = new BoundingSphere(new Point3d(0.0, 0.0, 0.0), 100.0);
 			orbit.setSchedulingBounds(bounds2);
 			viewingPlatform.setViewPlatformBehavior(orbit);
 						
