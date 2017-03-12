@@ -28,7 +28,7 @@ ant
 Java >= 1.6
 
 # note
-the app resizes the model and relocates the origin to convenience viewing manipulations
+- the app resizes the model and relocates the origin to convenience viewing manipulations
 
 
 # Attributions
