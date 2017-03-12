@@ -34,12 +34,12 @@ Java >= 1.6
 # Attributions
 this app/project uses/is made possible by the java3d and jogl implementations maintained by the jogamp community
 and part are derivatived works in particular of java3d from sun/oracle
-http://jogamp.org/
-https://gouessej.wordpress.com/2012/08/01/java-3d-est-de-retour-java-3d-is-back/#installation
-https://github.com/hharrison/java3d-core
-https://github.com/hharrison/java3d-utils
-https://github.com/hharrison/vecmath
-http://jogamp.org/deployment/v2.3.2/fat/jogamp-fat.jar
+- http://jogamp.org/
+- https://gouessej.wordpress.com/2012/08/01/java-3d-est-de-retour-java-3d-is-back/#installation
+- https://github.com/hharrison/java3d-core
+- https://github.com/hharrison/java3d-utils
+- https://github.com/hharrison/vecmath
+- http://jogamp.org/deployment/v2.3.2/fat/jogamp-fat.jar
 
 and the stl parser by cyanobacterium
 https://github.com/cyanobacterium/STL-Parser-for-Java
