@@ -18,10 +18,10 @@ libs/vecmath.jar
 java -jar stlviewer.jar
 (the above libs jars should be in libs subdirectory)
 
-holding / dragging the left mouse button rotates the model
-holding / dragging the right mouse button pan the model
-rotating the mouse wheel forward moves away from the model / backward moves towards the model
-clicking home on the toolbar reverts to the initial view
+- holding / dragging the left mouse button rotates the model
+- holding / dragging the right mouse button pan the model
+- rotating the mouse wheel forward moves away from the model / backward moves towards the model
+- clicking home on the toolbar reverts to the initial view
 
 # build
 
