@@ -2,7 +2,7 @@ this app/project uses / is made possible by the java3d and jogl implementations 
 and part are derivatived works in particular of java3d from sun/oracle
 
 http://jogamp.org/
-https://gouessej.wordpress.com/2012/08/01/java-3d-est-de-retour-java-3d-is-back/#installation
+https://gouessej.wordpress.com/2012/08/01/java-3d-est-de-retour-java-3d-is-back/
 https://github.com/hharrison/java3d-core
 https://github.com/hharrison/java3d-utils
 https://github.com/hharrison/vecmath
@@ -14,6 +14,14 @@ https://github.com/cyanobacterium/STL-Parser-for-Java
 partially derived from
 cpedrinaci/STL-Loader https://github.com/cpedrinaci/STL-Loader
 
-these links are active as of the date of writing March 2017
-However, the author of this app do not track them and they could literally be obselete/moved
-the author of this app made no representations that they would continue to be correct and/or available
+various different licenses applies to jars distributed in the libs folder. 
+those licenses are included in the libs/license folder. various source codes 
+are available in the attribution links above
+
+The sources for this app itself is originally hosted on
+https://github.com/ag88/stl-viewer
+http://sourceforge.net/projects/stl-viewer4j
+
+The above links are active when the software is originally released, mar 2017.
+However, the author of this app do not track them and they could literally be obselete/moved/deleted.  
+The author of this app made no representations that they would continue to be correct and/or available

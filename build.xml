@@ -23,6 +23,11 @@
         <javac srcdir="src" destdir="bin">
             <classpath refid="classpath" />            
 		</javac>
+		<copy todir="bin/images">
+    		<fileset dir="src/images" excludes="**/*.java"/>
+	    </copy>
+	    <copy file="src/org/stlviewer/copyright.htm" 
+	        tofile="bin/org/stlviewer/copyright.htm"/>		        
     </target>
 
     <target name="jar" depends="compile">
@@ -31,7 +36,6 @@
 		</manifestclasspath>
         
         <jar destfile="${tgtjarfile}" basedir="bin">
-            <zipfileset dir="src/images" prefix="images"/>
             <manifest>
                 <attribute name="Main-Class" value="org.stlviewer.STLViewer"/>
 				<attribute name="Class-Path" value="${jar.classpath}" />                

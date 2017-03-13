@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GraphicsConfiguration;
 import java.awt.HeadlessException;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -27,7 +28,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JToolBar;
 
-import org.stlviewer.PModel;
+import org.stlviewer.model.PModel;
 
 import com.sun.j3d.utils.universe.SimpleUniverse;
 import com.sun.j3d.utils.universe.ViewingPlatform;
@@ -66,6 +67,10 @@ public class STLViewer extends JFrame implements ActionListener, WindowListener 
 		mbar.add(mfile);
 		JMenu mview = new JMenu("View");
 		mfile.setMnemonic(KeyEvent.VK_V);
+		JMenuItem mabt = new JMenuItem("About");
+		mabt.setActionCommand("ABOUT");
+		mabt.addActionListener(this);
+		mfile.add(mabt);
 		JMenuItem mres = new JMenuItem("Home", KeyEvent.VK_H);
 		mres.setActionCommand("VHOME");
 		mres.addActionListener(this);
@@ -77,7 +82,6 @@ public class STLViewer extends JFrame implements ActionListener, WindowListener 
 		mnstrp.addActionListener(this);
 		mtools.add(mnstrp);
 		mbar.add(mtools);
-
 		
 		setJMenuBar(mbar);
 
@@ -181,7 +185,14 @@ public class STLViewer extends JFrame implements ActionListener, WindowListener 
 			loadfile();			
 		} else if(e.getActionCommand().equals("VHOME")) {
 			canvas.homeview(universe);
-		} 
+		} else if(e.getActionCommand().equals("ABOUT")) {
+			About a = new About();
+			a.pack();
+			Point p = this.getLocationOnScreen();
+			a.setLocation(new Point(p.x+100,p.y+100));
+			a.setVisible(true);
+			
+		}
 	}
 
 	public static void main(String[] args) {
