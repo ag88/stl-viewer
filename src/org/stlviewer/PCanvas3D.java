@@ -27,7 +27,7 @@ import javax.vecmath.Point3f;
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 
-import org.stlviewer.model.PModel;
+import org.stlviewer.PModel;
 
 import com.sun.j3d.utils.behaviors.vp.OrbitBehavior;
 import com.sun.j3d.utils.universe.SimpleUniverse;
