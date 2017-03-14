@@ -28,8 +28,6 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JToolBar;
 
-import org.stlviewer.PModel;
-
 import com.sun.j3d.utils.universe.SimpleUniverse;
 import com.sun.j3d.utils.universe.ViewingPlatform;
 
@@ -154,7 +152,7 @@ public class STLViewer extends JFrame implements ActionListener, WindowListener 
 		// read file to array of triangles
 		try {
 			
-			List<Triangle> mesh = STLParser.parseSTLFile(file.toPath());			
+			List<Triangle> mesh = new STLParser().parseSTLFile(file.toPath());			
 			
 			if (mesh == null || mesh.isEmpty()) {
 				lstatusline.setText("no data read, possible file error");

@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2014 CCHall (aka Cyanobacterium aka cyanobacteruim)
+Copyright (c) 2014 CCHall (aka Cyanobacterium aka cyanobacteruim), 2017 Andrew Goh
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -33,15 +33,24 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import sun.security.util.ByteArrayTagOrder;
 
 /**
  * This class is a parser for STL files. Currently, normals specified in the 
  * file are ignored and recalculated under the assumption that the coordinates 
  * are provided in right-handed coordinate space (counter-clockwise).
  * @author CCHall
+ * @author Andrew Goh
+ * 
+ * -reversion: mar 2017 Andrew
+ * updated logic to handle binary STL files with "solid" in the header 
+ * 
  */
 public class STLParser {
 	/**
@@ -55,28 +64,116 @@ public class STLParser {
 	 * @throws IllegalArgumentException Thrown if the STL is not properly 
 	 * formatted
 	 */
-	public static List<Triangle> parseSTLFile(Path filepath) throws IOException{
+	public List<Triangle> parseSTLFile(Path filepath) 
+			throws IOException, IllegalArgumentException {
 		byte[] allBytes = Files.readAllBytes(filepath);
 		// determine if it is ASCII or binary STL
-		Charset charset = Charset.forName("UTF-8");
-		CharBuffer decode = charset.decode(ByteBuffer.wrap(allBytes, 0, 80));
-		String headerString = decode.toString();
-		int index = 0; 
-		while(Character.isWhitespace(headerString.charAt(index)) && index < 80){
-			index++;
+				
+		//some binary STL files has "solid" in the first 80 chars
+		//this breaks logic that determines if a file is ascii based on it
+		//simply beginning with "solid"
+		boolean isASCIISTL = false;
+		
+		//read the first 512 chars or less
+		String buf = readblock(allBytes, 0, 512);
+		StringBuffer sb = new StringBuffer();
+		int inl = readline(buf, sb, 0);
+		String line = sb.toString();
+		StringTokenizer st = new StringTokenizer(line);
+		String token = st.nextToken();
+		if(token.equals("solid")) { //start with "solid"
+			if(inl>-1) { //found new line for next line			
+				sb = new StringBuffer();
+				inl = readline(buf, sb, inl+1); //read next line, update inl
+				line = sb.toString();
+				st = new StringTokenizer(line);
+				token = st.nextToken();
+				if(token.equals("endsolid"))
+					isASCIISTL = true; //empty ascii file
+				else if(token.equals("facet")) {
+					isASCIISTL = true; //ascii file
+				} else if (isbinaryfile(allBytes))
+					isASCIISTL = false; //binary file					
+			} else { //no linefeed
+				if (isbinaryfile(allBytes))
+					isASCIISTL = false; //binary file
+			}				
+		} else {//does not starts with "solid" 
+			if (isbinaryfile(allBytes)) 
+				isASCIISTL = false; //binary file
 		}
-		String firstWord = headerString.substring(index);
-		boolean isASCIISTL = (firstWord.toLowerCase().startsWith("solid"));
-
+			
 		// read file to array of triangles
 		List<Triangle> mesh;
 		if(isASCIISTL){
+			Charset charset = Charset.forName("UTF-8");
 			mesh = readASCII(charset.decode(ByteBuffer.wrap(allBytes)).toString().toLowerCase());
 		} else {
 			mesh = readBinary(allBytes);
 		}
 		return mesh;
 	}
+	
+	public String readblock(byte[] allBytes, int offset, int length) {
+		if(allBytes.length-offset<length) length = allBytes.length-offset;
+		Charset charset = Charset.forName("UTF-8");
+		CharBuffer decode = charset.decode(ByteBuffer.wrap(allBytes, offset, length));
+		return decode.toString().toLowerCase();
+	}
+	
+	public int readline(String buf, StringBuffer sb, int offset) {
+		int il = buf.indexOf('\n', offset);
+		if(il>-1)
+			sb.append(buf.substring(offset, il-1));
+		else
+			sb.append(buf.substring(offset));
+		return il;
+	}
+	
+	public String lastline(String buf) {
+		int i = buf.length();
+		while(--i>-1) {
+			if(buf.charAt(i) == '\n')
+				break;			
+		}
+		if (i>-1)
+			return buf.substring(i+1);
+		else 
+			return "";
+	}
+	
+	public boolean isbinaryfile(byte[] allBytes) throws IllegalArgumentException {
+		if (allBytes.length<84)
+			throw new IllegalArgumentException("invalid binary file, length<84");			
+		int numtriangles = byteatoint(Arrays.copyOfRange(allBytes, 80, 84));
+		if (allBytes.length >= 84 + numtriangles * 50)
+			return true; //is binary file
+		else {
+			String msg = "invalid binary file, num triangles does not match length specs";
+			throw new IllegalArgumentException(msg);
+		}
+	}
+	
+	// little endian
+	public int byteatoint(byte[] bytes) {
+		assert (bytes.length == 4);
+		int r = 0;
+		r = bytes[0] & 0xff;
+		r |= (bytes[1] & 0xff) << 8;
+		r |= (bytes[2] & 0xff) << 16;
+		r |= (bytes[3] & 0xff) << 24 ;		
+		return r;
+	}
+	
+	public byte[] inttobytea(int value) {
+		byte bytes[] = new byte[4];
+		bytes[0] = (byte) value;
+		bytes[1] = (byte)(value >> 8);
+	    bytes[2] = (byte)(value >> 16);	    
+	    bytes[3] = (byte)(value >> 24);
+	    return bytes;
+	}
+	
 	/**
 	 * Reads an STL ASCII file content provided as a String
 	 * @param content ASCII STL
@@ -85,7 +182,7 @@ public class STLParser {
 	 * @throws IllegalArgumentException Thrown if the STL is not properly 
 	 * formatted
 	 */
-	public static List<Triangle> readASCII(String content) throws IllegalArgumentException {
+	public List<Triangle> readASCII(String content) throws IllegalArgumentException {
 		Logger.getLogger(STLParser.class.getName()).log(Level.FINEST,"Parsing ASCII STL format");
 		// string is lowercase
 		ArrayList<Triangle> triangles = new ArrayList<>();
@@ -149,7 +246,7 @@ public class STLParser {
 	 * @throws IllegalArgumentException Thrown if the STL is not properly 
 	 * formatted
 	 */
-	public static List<Triangle> readBinary(byte[] allBytes) throws IllegalArgumentException {
+	public List<Triangle> readBinary(byte[] allBytes) throws IllegalArgumentException {
 		Logger.getLogger(STLParser.class.getName()).log(Level.FINEST,"Parsing binary STL format");
 		DataInputStream in = new DataInputStream(new ByteArrayInputStream(allBytes));
 		ArrayList<Triangle> triangles = new ArrayList<>();

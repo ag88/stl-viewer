@@ -62,7 +62,7 @@ public class TestApp {
 		try {
 			
 			// read file to array of triangles
-			List<Triangle> mesh = STLParser.parseSTLFile(f.toPath());
+			List<Triangle> mesh = new STLParser().parseSTLFile(f.toPath());
 			
 			
 			// show the results
