@@ -27,7 +27,7 @@ import javax.vecmath.Point3f;
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 
-import org.stlviewer.PModel;
+import org.stlviewer.model.PModel;
 
 import com.sun.j3d.utils.behaviors.vp.OrbitBehavior;
 import com.sun.j3d.utils.universe.SimpleUniverse;
@@ -158,9 +158,9 @@ public class PCanvas3D extends Canvas3D {
 				double dr = lb - rb;
 				double tx = 0.0, ty = 0.0, tz = 0.0;
 				if (dr > 0) {
-					tx = low.x;
-					ty = low.y;
-					tz = low.z;
+					tx = low.x*scale;
+					ty = low.y*scale;
+					tz = low.z*scale;
 				}
 				Vector3d vt = new Vector3d(-tx, -ty, -tz);
 				
@@ -175,7 +175,7 @@ public class PCanvas3D extends Canvas3D {
 				double scale = 10.0/r;
 				double c = Math.sqrt(center.x*center.x + center.y*center.y);
 				double d = Math.sqrt(c*c + center.z*center.z);
-				double dr = Math.abs(d) - r;
+				double dr = d - r;
 				double tx = 0.0, ty = 0.0, tz = 0.0;
 				if (dr > 0) {
 					tx = dr * center.x * scale / d;
