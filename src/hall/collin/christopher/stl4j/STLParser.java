@@ -84,7 +84,7 @@ public class STLParser {
 		if(token.equals("solid")) { //start with "solid"
 			if(inl>-1) { //found new line for next line			
 				sb = new StringBuffer();
-				inl = readline(buf, sb, inl+1); //read next line, update inl
+				inl = readline(buf, sb, inl+1); //read next line
 				line = sb.toString();
 				st = new StringTokenizer(line);
 				token = st.nextToken();
