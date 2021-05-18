@@ -25,7 +25,7 @@ public class About extends JFrame {
 
 	public About() throws HeadlessException {
 		super("About");
-		setPreferredSize(new Dimension(800, 600));
+		setPreferredSize(new Dimension(800, 650));
 		createwin();
 	}
 
@@ -97,7 +97,7 @@ public class About extends JFrame {
 			l1 = new JLabel(buf);
 			l1.setFont(font);
 			l1.setAlignmentX(LEFT_ALIGNMENT);					
-			getContentPane().add(l1);
+			getContentPane().add(l1);						
 			
 		} catch (IOException e) {
 			//nothing

@@ -30,7 +30,7 @@ ant
 
 # Pre-requisites
 
-Java >= 1.6
+Java >= 1.8
 
 # note
 - the app resizes the model and relocates the origin to ease viewing manipulations
