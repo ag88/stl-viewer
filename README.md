@@ -61,3 +61,5 @@ Software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
 
 # origin
 originally hosted on: https://github.com/ag88/stl-viewer
+
+developing this has taken quite some effort mainly in getting it to work and rather extensive tests. if you use this app and found it useful, you may like to buy me a coffee [![Donate](web/donorbox.svg)](https://donorbox.org/stl-viewer) ;)
