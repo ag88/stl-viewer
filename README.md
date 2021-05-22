@@ -34,6 +34,8 @@ ant
 
 Java >= 1.8
 
+note: some later releases of Java e.g. 9, 11 and above messed up the controls and panning with right mouse doesn't work\! if you encounter this issue use a Java 1.8 jdk/jre instead.
+
 # note
 - the app resizes the model and relocates the origin to ease viewing manipulations
 
@@ -64,4 +66,4 @@ Software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
 # origin
 originally hosted on: https://github.com/ag88/stl-viewer
 
-developing this has taken quite some effort mainly in getting it to work and rather extensive tests. i'd really appreciate it if you could support my efforts [![Donate](web/donorbox.png)](https://donorbox.org/stl-viewer) ;)
+developing this has taken quite some effort mainly in getting it to work and rather extensive tests. i'd really appreciate it if you could support my efforts [![Donate](web/donorbox.png)](https://donorbox.org/stl-viewer), you could also help simply starring this repository  ;)
