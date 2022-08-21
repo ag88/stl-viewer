@@ -20,7 +20,7 @@
 
     <target name="compile">
         <mkdir dir="bin"/>
-        <javac srcdir="src" destdir="bin" source="1.8" target="1.8">
+        <javac srcdir="src" destdir="bin" source="11" target="11">
             <classpath refid="classpath" />            
 		</javac>
 		<copy todir="bin/images">

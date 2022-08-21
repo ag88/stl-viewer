@@ -32,9 +32,17 @@ ant
 
 # Pre-requisites
 
-Java >= 1.8
+Release 0.9.0
+Java >= 11
 
-note: some later releases of Java e.g. 9, 11 and above messed up the controls and panning with right mouse doesn't work\! if you encounter this issue use a Java 1.8 jdk/jre instead.
+- This release requires Java 11 to run.
+- some later releases of Java e.g. 9, 11 and above messed up the controls and panning with right mouse doesn't work\! if you encounter this issue use a Java 1.8 jdk/jre instead.
+
+Release 0.8.0
+Java >= 8
+- this is the previous working release. This release requires Jjava 1.8 jdk/jre to run.
+- if you are running Java 8, use this release.
+
 
 # note
 - the app resizes the model and relocates the origin to ease viewing manipulations

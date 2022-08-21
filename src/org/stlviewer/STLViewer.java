@@ -8,6 +8,9 @@ import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
@@ -27,9 +30,11 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
 
-import com.sun.j3d.utils.universe.SimpleUniverse;
-import com.sun.j3d.utils.universe.ViewingPlatform;
+import org.jogamp.java3d.utils.universe.SimpleUniverse;
+import org.jogamp.java3d.utils.universe.Viewer;
+import org.jogamp.java3d.utils.universe.ViewingPlatform;
 
 import hall.collin.christopher.stl4j.STLParser;
 import hall.collin.christopher.stl4j.Triangle;
@@ -42,6 +47,7 @@ public class STLViewer extends JFrame implements ActionListener, WindowListener 
 	SimpleUniverse universe;
 	
 	JCheckBoxMenuItem mnstrp;
+	JCheckBoxMenuItem mnmousefix;
 	
 	public STLViewer(String args[]) throws HeadlessException {
 		super("STL Viewer");
@@ -78,7 +84,11 @@ public class STLViewer extends JFrame implements ActionListener, WindowListener 
 		mfile.setMnemonic(KeyEvent.VK_T);
 		mnstrp = new JCheckBoxMenuItem("Regen Normals/Connect strips",true);
 		mnstrp.addActionListener(this);
-		mtools.add(mnstrp);
+		mtools.add(mnstrp);		
+		mnmousefix = new JCheckBoxMenuItem("fix mouse interactions",false);
+		mnmousefix.setActionCommand("MOUSEFIX");
+		mnmousefix.addActionListener(this);
+		mtools.add(mnmousefix);		
 		mbar.add(mtools);
 		
 		setJMenuBar(mbar);
@@ -130,6 +140,8 @@ public class STLViewer extends JFrame implements ActionListener, WindowListener 
 
 		return button;
 	}	
+	
+		
 	
 	private File currdir;
 	
@@ -183,6 +195,8 @@ public class STLViewer extends JFrame implements ActionListener, WindowListener 
 			loadfile();			
 		} else if(e.getActionCommand().equals("VHOME")) {
 			canvas.homeview(universe);
+		} else if(e.getActionCommand().equals("MOUSEFIX")) {
+			//domousefix();
 		} else if(e.getActionCommand().equals("ABOUT")) {
 			About a = new About();
 			a.pack();
@@ -192,6 +206,7 @@ public class STLViewer extends JFrame implements ActionListener, WindowListener 
 			
 		}
 	}
+
 
 	public static void main(String[] args) {
 		new STLViewer(args);

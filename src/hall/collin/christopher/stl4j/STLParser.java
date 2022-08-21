@@ -39,7 +39,6 @@ import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import sun.security.util.ByteArrayTagOrder;
 
 /**
  * This class is a parser for STL files. Currently, normals specified in the 
