@@ -47,6 +47,7 @@
         <mkdir dir="dist"/>
         <zip destfile="dist/${tgtzipfile}">
              <zipfileset dir="libs" prefix="stlviewer/libs"/>
+             <zipfileset dir="web" prefix="stlviewer/web"/>
              <zipfileset dir="." prefix="stlviewer">
                  <include name="${tgtjarfile}"/>
                  <include name="README.md"/>

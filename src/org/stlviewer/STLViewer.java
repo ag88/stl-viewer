@@ -1,10 +1,12 @@
 package org.stlviewer;
 
+import java.awt.AWTException;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GraphicsConfiguration;
 import java.awt.HeadlessException;
 import java.awt.Point;
+import java.awt.Robot;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -13,13 +15,17 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
@@ -31,6 +37,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.jogamp.java3d.utils.universe.SimpleUniverse;
 import org.jogamp.java3d.utils.universe.Viewer;
@@ -46,6 +53,8 @@ public class STLViewer extends JFrame implements ActionListener, WindowListener 
 	PModel model;
 	SimpleUniverse universe;
 	
+	private Preferences pref = Preferences.userNodeForPackage(org.stlviewer.STLViewer.class);
+
 	JCheckBoxMenuItem mnstrp;
 	JCheckBoxMenuItem mnmousefix;
 	
@@ -82,10 +91,15 @@ public class STLViewer extends JFrame implements ActionListener, WindowListener 
 		mbar.add(mview);
 		JMenu mtools = new JMenu("Tools");
 		mfile.setMnemonic(KeyEvent.VK_T);
+		JMenuItem msnap = new JMenuItem("Snapshot", KeyEvent.VK_S);
+		msnap.setActionCommand("TSNAP");
+		msnap.addActionListener(this);
+		mtools.add(msnap);
 		mnstrp = new JCheckBoxMenuItem("Regen Normals/Connect strips",true);
 		mnstrp.addActionListener(this);
 		mtools.add(mnstrp);		
-		mnmousefix = new JCheckBoxMenuItem("fix mouse interactions",false);
+		boolean mousefix = pref.getBoolean("mousefix", false);
+		mnmousefix = new JCheckBoxMenuItem("fix mouse interactions",mousefix);
 		mnmousefix.setActionCommand("MOUSEFIX");
 		mnmousefix.addActionListener(this);
 		mtools.add(mnmousefix);		
@@ -100,7 +114,8 @@ public class STLViewer extends JFrame implements ActionListener, WindowListener 
 		toolbar.add(button);
 		button = makeNavigationButton("Home24.gif", "VHOME", "Home", "Home");
 		toolbar.add(button);
-
+		button = makeNavigationButton("camera.png", "TSNAP", "Snapshot", "Snapshot");
+		toolbar.add(button);
 		
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(toolbar, BorderLayout.NORTH);
@@ -114,6 +129,7 @@ public class STLViewer extends JFrame implements ActionListener, WindowListener 
 		
 		universe = new SimpleUniverse(canvas);
 		canvas.initcanvas(universe);
+		canvas.fixmouseinteraction(universe, mousefix);
 						
 		pack();			
 		setLocationRelativeTo(null);		
@@ -145,18 +161,45 @@ public class STLViewer extends JFrame implements ActionListener, WindowListener 
 	
 	private File currdir;
 	
+	private String getlastdir() {
+		String last_dir = pref.get("last_dir", "");
+		if(last_dir != "") {
+			currdir = new File(last_dir);
+			if(!currdir.isDirectory()) {
+				currdir = null;
+				return last_dir;
+			}
+		} else 
+		  last_dir = null;
+		
+		return last_dir;
+	}
+	
 	private File askForFile(){
 		
-		JFileChooser jfc = new JFileChooser(currdir);
-		int action = jfc.showOpenDialog(null);
+		int action;
+		JFileChooser jfc = new JFileChooser(getlastdir());
+		action = jfc.showOpenDialog(null);
 		if(action != JFileChooser.APPROVE_OPTION){
 			return null;
 		}
 		File file = jfc.getSelectedFile();
-		if (file.getParentFile() != null) currdir = file.getParentFile();		
+		if (file.getParentFile() != null) {
+			currdir = file.getParentFile();
+			String dirstr;
+			try {
+				dirstr = currdir.getCanonicalPath();
+				try {
+					pref.put("last_dir", dirstr);
+					pref.flush();
+				} catch (BackingStoreException e) {
+				}
+			} catch (IOException e) {				
+			}
+		}
 		return file;
 	}
-	
+			
 	private void loadfile() {
 		File file = askForFile();
 		if(file == null) return;
@@ -180,6 +223,8 @@ public class STLViewer extends JFrame implements ActionListener, WindowListener 
 			//model.loadstl(file);
 			
 			canvas.rendermodel(model, universe);
+			boolean mousefix = mnmousefix.isSelected();
+			canvas.fixmouseinteraction(universe, mousefix);
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -189,14 +234,86 @@ public class STLViewer extends JFrame implements ActionListener, WindowListener 
 		}
 	}
 
+	private File filesavedialog(FileNameExtensionFilter filter ){
+		
+		int action;
+		JFileChooser jfc = new JFileChooser(currdir);
+		if (filter != null) jfc.setFileFilter(filter);
+		action = jfc.showSaveDialog(null);
+		if(action != JFileChooser.APPROVE_OPTION){
+			return null;
+		}
+		File file = jfc.getSelectedFile();
+		if (file.getParentFile() != null) currdir = file.getParentFile();		
+		return file;
+	}
+	
+	class SnapRun implements Runnable {
+
+		File file;
+		public SnapRun(File file) {
+			this.file = file;
+		}
+		
+		@Override
+		public void run() {
+		    Robot r;
+			try {
+				r = new Robot();
+			} catch (AWTException e1) {
+				e1.printStackTrace();
+				return;
+			}
+		    BufferedImage snapshot = r.createScreenCapture(new java.awt.Rectangle(
+			            (int) canvas.getLocationOnScreen().getX(), 
+			            (int) canvas.getLocationOnScreen().getY(), 
+			            canvas.getBounds().width,
+			            canvas.getBounds().height));
+			try {
+				ImageIO.write(snapshot,"PNG",file);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+	}
+	
+	private void snapshot() {
+		
+		FileNameExtensionFilter filter = new FileNameExtensionFilter("PNG file", "png");
+		File file = filesavedialog(filter);
+		if(file == null) return;
+		if(!file.getName().endsWith(".png")) {
+			try {
+				file = new File(file.getCanonicalPath().concat(".png"));
+			} catch (IOException e) {
+				e.printStackTrace();
+				return;
+			}
+		}
+		
+		canvas.invalidate();
+		canvas.repaint();
+		SwingUtilities.invokeLater(new SnapRun(file));
+		
+	}
+
+	private void domousefix() {
+		boolean fix = mnmousefix.isSelected();
+		canvas.fixmouseinteraction(universe, fix);
+		pref.putBoolean("mousefix", fix);		
+	}
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getActionCommand().equals("FOPEN")) {
 			loadfile();			
 		} else if(e.getActionCommand().equals("VHOME")) {
 			canvas.homeview(universe);
+		} else if(e.getActionCommand().equals("TSNAP")) {
+			snapshot();	
 		} else if(e.getActionCommand().equals("MOUSEFIX")) {
-			//domousefix();
+			domousefix();
 		} else if(e.getActionCommand().equals("ABOUT")) {
 			About a = new About();
 			a.pack();
