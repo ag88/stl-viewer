@@ -8,18 +8,24 @@ STLViewer
 # install
 unzip distributed stlviewer*.zip
 
-should extract:
-stlviewer.jar
+should extract:  
+stlviewer.jar  
 libs/j3dcore.jar  
 libs/j3dutils.jar  
-libs/jogamp-fat.jar
-libs/vecmath.jar
+libs/jogamp-fat.jar  
+libs/vecmath.jar  
 , etc to a directory
 
 # run
-java -jar stlviewer.jar
-(the above libs jars should be in libs subdirectory)
 
+Go into the directory, run:
+
+``` java -jar stlviewer.jar ```
+
+In the directory, the above libs jars should be in libs subdirectory. 
+In Windows and various OS you may be able to run it by simply double clicking the jar file
+
+Navigation
 - holding / dragging the left mouse button rotates the model
 - holding / dragging the right mouse button pan the model
 - rotating the mouse wheel forward moves away from the model / backward moves towards the model
