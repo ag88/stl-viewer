@@ -3,6 +3,8 @@ package org.stlviewer;
 import java.awt.Font;
 import java.awt.GraphicsConfiguration;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.jogamp.java3d.AmbientLight;
 import org.jogamp.java3d.Background;
@@ -36,6 +38,7 @@ import org.jogamp.java3d.utils.universe.ViewingPlatform;
 public class PCanvas3D extends Canvas3D {
 
 	TransformGroup transform = null;
+	OrbitBehaviorFix orbit;
 
 	public PCanvas3D(GraphicsConfiguration arg0) {
 		super(arg0);
@@ -118,6 +121,13 @@ public class PCanvas3D extends Canvas3D {
 		ViewingPlatform viewingPlatform = universe.getViewingPlatform();
 		viewingPlatform.setNominalViewingTransform();
 
+		// add mouse behaviors to the ViewingPlatform
+		//ViewingPlatform viewingPlatform = universe.getViewingPlatform();
+		orbit = new OrbitBehaviorFix(this, OrbitBehavior.REVERSE_ALL);
+		BoundingSphere bounds2 = new BoundingSphere(new Point3d(0.0, 0.0, 0.0), 100.0);
+		orbit.setSchedulingBounds(bounds2);
+		viewingPlatform.setViewPlatformBehavior(orbit);
+
 	}
 
 	public void rendermodel(PModel model, SimpleUniverse universe) {
@@ -187,34 +197,26 @@ public class PCanvas3D extends Canvas3D {
 
 			objTrans.addChild(model);
 
-			// add mouse behaviors to the ViewingPlatform
-			ViewingPlatform viewingPlatform = universe.getViewingPlatform();
-			OrbitBehavior orbit = new OrbitBehavior(this, OrbitBehavior.REVERSE_ALL);
-			// BoundingSphere bounds2 = new BoundingSphere(center, 100.0);
-			BoundingSphere bounds2 = new BoundingSphere(new Point3d(0.0, 0.0, 0.0), 100.0);
-			orbit.setSchedulingBounds(bounds2);
-			viewingPlatform.setViewPlatformBehavior(orbit);
-
 		}
 	}
 
-	public void fixmouseinteraction(SimpleUniverse universe, boolean fix) {
+	public void fixmouseinteraction(SimpleUniverse universe, Map<OrbitBehaviorFix.TFunc, BtnBind> maptfb) {
 
-		if (fix) {
-			ViewingPlatform viewingPlatform = universe.getViewingPlatform();
-			OrbitBehaviorFix orbit = new OrbitBehaviorFix(this, OrbitBehavior.REVERSE_ALL);
-			BoundingSphere bounds = new BoundingSphere(new Point3d(0.0, 0.0, 0.0), 100.0);
-			orbit.setSchedulingBounds(bounds);
-			viewingPlatform.setViewPlatformBehavior(orbit);
-		} else {
-			ViewingPlatform viewingPlatform = universe.getViewingPlatform();
-			OrbitBehavior orbit = new OrbitBehavior(this, OrbitBehavior.REVERSE_ALL);
-			BoundingSphere bounds = new BoundingSphere(new Point3d(0.0, 0.0, 0.0), 100.0);
-			orbit.setSchedulingBounds(bounds);
-			viewingPlatform.setViewPlatformBehavior(orbit);
-		}
+		ViewingPlatform viewingPlatform = universe.getViewingPlatform();
+		orbit = new OrbitBehaviorFix(this, OrbitBehavior.REVERSE_ALL);
+		if(maptfb != null)
+			orbit.setMaptfb(maptfb);
+		BoundingSphere bounds = new BoundingSphere(new Point3d(0.0, 0.0, 0.0), 100.0);
+		orbit.setSchedulingBounds(bounds);
+		viewingPlatform.setViewPlatformBehavior(orbit);
+
 	}
-
+	
+	public Map<OrbitBehaviorFix.TFunc, BtnBind> getMaptfb() {
+		if(orbit == null) return null;
+		return orbit.getMaptfb();
+	}
+	
 	TransformGroup gettransform(SimpleUniverse universe) {
 		if (transform == null) {
 			Locale ulocale = universe.getLocale();

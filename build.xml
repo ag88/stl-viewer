@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project default="zip">
 
-    <property name="tgtjarfile" value="stlviewer.jar" />
-    <property name="tgtzipfile" value="stlviewer.zip" />
+	<property name="appname" value="stlviewer" />
+	<property name="version" value="0.10.0" />
+    <property name="tgtjarfile" value="${appname}.jar" />
+    <property name="tgtzipfile" value="${appname}-${version}.zip" />
      
       
 	<path id="classpath">
@@ -46,9 +48,9 @@
     <target name="zip" depends="jar">
         <mkdir dir="dist"/>
         <zip destfile="dist/${tgtzipfile}">
-             <zipfileset dir="libs" prefix="stlviewer/libs"/>
-             <zipfileset dir="web" prefix="stlviewer/web"/>
-             <zipfileset dir="." prefix="stlviewer">
+             <zipfileset dir="libs" prefix="${appname}-${version}/libs"/>
+             <zipfileset dir="web" prefix="${appname}-${version}/web"/>
+             <zipfileset dir="." prefix="${appname}-${version}">
                  <include name="${tgtjarfile}"/>
                  <include name="README.md"/>
                  <include name="license.txt"/>

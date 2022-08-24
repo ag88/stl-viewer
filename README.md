@@ -38,30 +38,29 @@ ant
 
 # Pre-requisites
 
-Release 0.9.0  
-Java >= 11
+Release 0.10.0 requires Java >= 11 Java/JDK 11 or higher to run.
 
-- This release requires Java/JDK 11 or higher to run.
-- some later releases of Java e.g. 9, 11 and above messed up the controls and panning with right mouse doesn't work\! if you encounter this issue try Tools > "fix mouse interactions" 
-
-Release 0.8.0  
-Java 8
-- this is the previous working release. This release requires Java 1.8 jdk/jre to run.
+Release 0.8.0 :
+This is the previous working release. This release requires Java 1.8 jdk/jre to run.
 - if you are running Java 8, use this release.
 
 # Changelog
 
-Release 0.9.0
+Release 0.10.0 JDK >= 11
 - fixes for mouse interactions in Java 11
 - requires Java 11 (JDK 11) or higher to run
 - added snapshot/screenshot
+- Tools > "fix mouse interactions" now provides a "mouse controls" dialog.  
+![mouse control](web/mousectl.png "mouse control")  
+You can reassign the mouse buttons. The same mouse button can be used for different functions rotate/zoom/pan with ctrl/shift keys.
 
-Release 0.8.0
+Release 0.8.0 JDK = 8
 - an initial stable release
 - requires Java 8 (JDK 8)
 
 # note
 - the app resizes the model and relocates the origin to ease viewing manipulations
+- in relesae 0.9.0, some later releases of Java e.g. 9, 11 and above messed up the controls and panning with right mouse doesn't work! if you encounter this issue try Tools > "fix mouse interactions". use release 0.10.0 instead, that fixes this issue and provides features to reassign/remap the mouse buttons.
 
 
 # Attributions

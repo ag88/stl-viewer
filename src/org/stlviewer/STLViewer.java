@@ -20,12 +20,15 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
 import javax.imageio.ImageIO;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
@@ -35,13 +38,16 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileNameExtensionFilter;
-
+import org.jogamp.java3d.utils.behaviors.vp.OrbitBehavior;
 import org.jogamp.java3d.utils.universe.SimpleUniverse;
 import org.jogamp.java3d.utils.universe.Viewer;
 import org.jogamp.java3d.utils.universe.ViewingPlatform;
+import org.stlviewer.OrbitBehaviorFix.TFunc;
 
 import hall.collin.christopher.stl4j.STLParser;
 import hall.collin.christopher.stl4j.Triangle;
@@ -55,8 +61,7 @@ public class STLViewer extends JFrame implements ActionListener, WindowListener 
 	
 	private Preferences pref = Preferences.userNodeForPackage(org.stlviewer.STLViewer.class);
 
-	JCheckBoxMenuItem mnstrp;
-	JCheckBoxMenuItem mnmousefix;
+	JCheckBoxMenuItem mnstrp;	
 	
 	public STLViewer(String args[]) throws HeadlessException {
 		super("STL Viewer");
@@ -99,10 +104,11 @@ public class STLViewer extends JFrame implements ActionListener, WindowListener 
 		mnstrp.addActionListener(this);
 		mtools.add(mnstrp);		
 		boolean mousefix = pref.getBoolean("mousefix", false);
-		mnmousefix = new JCheckBoxMenuItem("fix mouse interactions",mousefix);
-		mnmousefix.setActionCommand("MOUSEFIX");
-		mnmousefix.addActionListener(this);
-		mtools.add(mnmousefix);		
+		
+		JMenuItem mmousefix = new JMenuItem("fix mouse interactions");
+		mmousefix.setActionCommand("MOUSEFIX");
+		mmousefix.addActionListener(this);
+		mtools.add(mmousefix);		
 		mbar.add(mtools);
 		
 		setJMenuBar(mbar);
@@ -129,7 +135,7 @@ public class STLViewer extends JFrame implements ActionListener, WindowListener 
 		
 		universe = new SimpleUniverse(canvas);
 		canvas.initcanvas(universe);
-		canvas.fixmouseinteraction(universe, mousefix);
+		loadbuttonbind();
 						
 		pack();			
 		setLocationRelativeTo(null);		
@@ -137,6 +143,38 @@ public class STLViewer extends JFrame implements ActionListener, WindowListener 
 				
 	}
 	
+	private void loadbuttonbind() {
+		Map<OrbitBehaviorFix.TFunc, BtnBind> maptfb = canvas.getMaptfb();
+		
+		String bind = pref.get("RotateBind", null);
+		if(!(bind == null || bind == "")) {
+			BtnBind b = new BtnBind(OrbitBehaviorFix.TFunc.ROTATE);
+			b.parseBtnStr(bind);
+			maptfb.put(TFunc.ROTATE, b);
+		}
+		bind = pref.get("TranslateBind", null);
+		if(!(bind == null || bind == "")) {
+			BtnBind b = new BtnBind(OrbitBehaviorFix.TFunc.TRANSLATE);
+			b.parseBtnStr(bind);
+			maptfb.put(TFunc.TRANSLATE, b);
+		}
+		bind = pref.get("ZoomBind", null);
+		if(!(bind == null || bind == "")) {
+			BtnBind b = new BtnBind(OrbitBehaviorFix.TFunc.ZOOM);
+			b.parseBtnStr(bind);
+			maptfb.put(TFunc.ZOOM, b);
+		}
+		canvas.fixmouseinteraction(universe, maptfb);		
+	}
+
+	private void savebuttonbind(Map<OrbitBehaviorFix.TFunc, BtnBind> maptfb) {
+		BtnBind b = maptfb.get(OrbitBehaviorFix.TFunc.ROTATE);
+		pref.put("RotateBind", b.getBtnStr());
+		b = maptfb.get(OrbitBehaviorFix.TFunc.TRANSLATE);
+		pref.put("TranslateBind", b.getBtnStr());
+		b = maptfb.get(OrbitBehaviorFix.TFunc.ZOOM);
+		pref.put("ZoomBind", b.getBtnStr());
+	}
 	protected JButton makeNavigationButton(String imageName, String actionCommand, String toolTipText, String altText) {
 		// Look for the image.
 		String imgLocation = "/images/" + imageName;
@@ -223,8 +261,7 @@ public class STLViewer extends JFrame implements ActionListener, WindowListener 
 			//model.loadstl(file);
 			
 			canvas.rendermodel(model, universe);
-			boolean mousefix = mnmousefix.isSelected();
-			canvas.fixmouseinteraction(universe, mousefix);
+			//canvas.fixmouseinteraction(universe, null);
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -299,9 +336,16 @@ public class STLViewer extends JFrame implements ActionListener, WindowListener 
 	}
 
 	private void domousefix() {
-		boolean fix = mnmousefix.isSelected();
-		canvas.fixmouseinteraction(universe, fix);
-		pref.putBoolean("mousefix", fix);		
+		Map<OrbitBehaviorFix.TFunc,BtnBind> maptfb = canvas.getMaptfb();
+		DlgMouseControl dlg = new DlgMouseControl(this, maptfb);
+		dlg.pack();
+		dlg.setLocationRelativeTo(this);
+		int ret = dlg.showdialog(); 						
+		if (ret == DlgMouseControl.RET_OK) {
+			maptfb = dlg.getMaptfb();
+			canvas.fixmouseinteraction(universe, maptfb);
+			savebuttonbind(maptfb);			
+		}
 	}
 
 	@Override
