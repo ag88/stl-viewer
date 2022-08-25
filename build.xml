@@ -48,8 +48,8 @@
             </manifest>
         </jar>
     </target>
-
-    <target name="zip" depends="jar">
+	
+    <target name="dist" depends="jar">
         <mkdir dir="dist"/>
         <zip destfile="dist/${tgtzipfile}">
              <zipfileset dir="libs" prefix="${appname}-${version}/libs"/>
