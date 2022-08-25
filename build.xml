@@ -57,6 +57,7 @@
              <zipfileset dir="." prefix="${appname}-${version}">
                  <include name="${tgtjarfile}"/>
                  <include name="README.md"/>
+             	 <include name="README.htm"/>
                  <include name="license.txt"/>
                  <include name="attributions.txt"/>                     
              </zipfileset>
