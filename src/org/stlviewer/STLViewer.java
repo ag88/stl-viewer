@@ -22,8 +22,6 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
@@ -43,6 +41,15 @@ import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jogamp.java3d.utils.behaviors.vp.OrbitBehavior;
 import org.jogamp.java3d.utils.universe.SimpleUniverse;
 import org.jogamp.java3d.utils.universe.Viewer;
@@ -54,20 +61,53 @@ import hall.collin.christopher.stl4j.Triangle;
 
 public class STLViewer extends JFrame implements ActionListener, WindowListener {
 	
+	Logger logger = LogManager.getLogger(STLViewer.class);
+	
 	PCanvas3D canvas;
 	JLabel lstatusline;
 	PModel model;
 	SimpleUniverse universe;
 	
 	private Preferences pref = Preferences.userNodeForPackage(org.stlviewer.STLViewer.class);
+	private CommandLine cmdline;
 
 	JCheckBoxMenuItem mnstrp;	
 	
 	public STLViewer(String args[]) throws HeadlessException {
 		super("STL Viewer");
+		parseargs(args);
+		
 		setDefaultCloseOperation(EXIT_ON_CLOSE);		
 		createwin();
 		addWindowListener(this);
+	}
+
+	private String[] parseargs(String[] args) {
+		Options options = new Options();
+		options.addOption(Option.builder("h").longOpt("help").desc("help").build());
+
+		DefaultParser parser = new DefaultParser();
+		try {
+			cmdline = parser.parse(options, args);
+			
+			if(cmdline.hasOption("help")) {
+				showhelp(options);
+				System.exit(0);
+			}						
+			
+		} catch (ParseException e) {
+			logger.error(e);
+			showhelp(options);
+			System.exit(1);
+		}
+		return cmdline.getArgs();
+	}
+	
+	private void showhelp(Options options) {
+		String appname = "stlviewer.jar";
+		HelpFormatter formatter = new HelpFormatter();
+		appname = appname + " [filename.stl]";
+		formatter.printHelp(appname, options);
 	}
 
 	public void createwin() {
@@ -136,13 +176,27 @@ public class STLViewer extends JFrame implements ActionListener, WindowListener 
 		universe = new SimpleUniverse(canvas);
 		canvas.initcanvas(universe);
 		loadbuttonbind();
-						
-		pack();			
+		
+		pack();
+		
+		loadinitstl();
 		setLocationRelativeTo(null);		
 		setVisible(true);
 				
 	}
 	
+	private void loadinitstl() {
+		if(cmdline.getArgs().length > 0) {
+			String filename = cmdline.getArgs()[0];
+			File file = new File(filename);
+			if(file.isFile() && file.exists()) {
+				logger.info("loading {}", filename);
+				loadfile(file);
+			}
+				
+		}		
+	}
+
 	private void loadbuttonbind() {
 		Map<OrbitBehaviorFix.TFunc, BtnBind> maptfb = canvas.getMaptfb();
 		
@@ -238,9 +292,11 @@ public class STLViewer extends JFrame implements ActionListener, WindowListener 
 		return file;
 	}
 			
-	private void loadfile() {
-		File file = askForFile();
-		if(file == null) return;
+	private void loadfile(File file) {
+		if (file == null) {
+			file = askForFile();
+			if(file == null) return;
+		}
 		
 		// read file to array of triangles
 		try {
@@ -267,7 +323,7 @@ public class STLViewer extends JFrame implements ActionListener, WindowListener 
 			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
 			lstatusline.setText("no data read, possible file error");
-			Logger.getLogger(STLViewer.class.getName()).log(Level.WARNING, e.getMessage());
+			logger.warn(e.getMessage());
 		}
 	}
 
@@ -351,7 +407,7 @@ public class STLViewer extends JFrame implements ActionListener, WindowListener 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getActionCommand().equals("FOPEN")) {
-			loadfile();			
+			loadfile(null);			
 		} else if(e.getActionCommand().equals("VHOME")) {
 			canvas.homeview(universe);
 		} else if(e.getActionCommand().equals("TSNAP")) {

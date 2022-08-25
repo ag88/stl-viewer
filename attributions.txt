@@ -18,6 +18,10 @@ various different licenses applies to jars distributed in the libs folder.
 those licenses are included in the libs/license folder. various source codes 
 are available in the attribution links above
 
+commons cli, log4j
+https://commons.apache.org/proper/commons-cli/index.html
+https://logging.apache.org/log4j/
+
 The sources for this app itself is originally hosted on
 https://github.com/ag88/stl-viewer
 http://sourceforge.net/projects/stl-viewer4j
